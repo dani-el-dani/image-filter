@@ -30,6 +30,24 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   /**************************************************************************** */
 
   //! END @TODO1
+  app.get("/filteredimage", async( req, res) => {
+    const image_url = req.query.image_url;
+    if(!image_url) {
+      res.status(400).send("The url of the image you want to filter is required");
+
+    }
+
+    const filteredImage : Promise<string> = filterImageFromURL(image_url);
+    filteredImage.then((filteredpath: string) => {
+      res.status(200).sendFile(filteredpath, function(){
+        // deletes the file on the server
+        const filesToDelete : Array<string> = [filteredpath];
+        deleteLocalFiles(filesToDelete);
+      });
+    }).catch((error) => {
+      res.status(422).send(`error has occuered ${error.message}`)
+    });
+  });
   
   // Root Endpoint
   // Displays a simple message to the user
